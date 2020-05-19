@@ -1,9 +1,13 @@
 package com.nan.custom_view
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.chad.library.adapter.base.BaseQuickAdapter
+import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import kotlinx.android.synthetic.main.activity_fullscreen.*
 
 /**
@@ -29,21 +33,15 @@ class FullscreenActivity : AppCompatActivity() {
     private val mShowPart2Runnable = Runnable {
         // Delayed display of UI elements
         supportActionBar?.show()
-        fullscreen_content_controls.visibility = View.VISIBLE
     }
     private var mVisible: Boolean = false
     private val mHideRunnable = Runnable { hide() }
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private val mDelayHideTouchListener = View.OnTouchListener { _, _ ->
-        if (AUTO_HIDE) {
-            delayedHide(AUTO_HIDE_DELAY_MILLIS)
-        }
-        false
-    }
+
+    private lateinit var adapter: HomeAdapter
+    private val homeData = mutableListOf(
+        HomeData("FlowLayout", FlowActivity::class.java),
+        HomeData("DaoActivity", DaoActivity::class.java)
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +57,18 @@ class FullscreenActivity : AppCompatActivity() {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        dummy_button.setOnTouchListener(mDelayHideTouchListener)
+        adapter = HomeAdapter()
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        adapter.setOnItemClickListener { _, _, position ->
+            startActivity(
+                Intent(
+                    this,
+                    adapter.data[position].clazz
+                )
+            )
+        }
+        adapter.setNewInstance(homeData)
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
@@ -82,7 +91,6 @@ class FullscreenActivity : AppCompatActivity() {
     private fun hide() {
         // Hide UI first
         supportActionBar?.hide()
-        fullscreen_content_controls.visibility = View.GONE
         mVisible = false
 
         // Schedule a runnable to remove the status and navigation bar after a delay
@@ -129,5 +137,13 @@ class FullscreenActivity : AppCompatActivity() {
          * and a change of the status and navigation bar.
          */
         private val UI_ANIMATION_DELAY = 300
+    }
+
+    class HomeData(val name: String, val clazz: Class<*>)
+
+    private class HomeAdapter : BaseQuickAdapter<HomeData, BaseViewHolder>(R.layout.item_home) {
+        override fun convert(holder: BaseViewHolder, item: HomeData) {
+            holder.setText(R.id.itemText, item.name)
+        }
     }
 }
