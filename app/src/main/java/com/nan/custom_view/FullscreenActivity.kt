@@ -40,7 +40,8 @@ class FullscreenActivity : AppCompatActivity() {
     private lateinit var adapter: HomeAdapter
     private val homeData = mutableListOf(
         HomeData("FlowLayout", FlowActivity::class.java),
-        HomeData("DaoActivity", DaoActivity::class.java)
+        HomeData("DaoActivity", DaoActivity::class.java),
+        HomeData("OkHttpActivity", OkHttpActivity::class.java)
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
